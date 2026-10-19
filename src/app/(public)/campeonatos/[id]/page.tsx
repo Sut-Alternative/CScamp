@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import {
   Trophy,
@@ -112,25 +113,38 @@ export default async function ChampionshipBracketPage({
       </div>
 
       {/* Header Banner */}
-      <div className="rounded-3xl border border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-4xl font-black text-white">{championship.name}</h1>
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-[#0e1118] p-6 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xl">
+        {/* Authentic Arena Backdrop */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/images/esports-arena.jpg"
+            alt="CS2 Tournament Arena"
+            fill
+            priority
+            className="object-cover opacity-25 brightness-75 contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0e1118] via-[#0e1118]/85 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0e1118] via-transparent to-[#0e1118]/60" />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">{championship.name}</h1>
             <StatusBadge status={championship.status} />
           </div>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-2">
+          <p className="text-xs sm:text-sm text-zinc-300 mt-2">
             Chaveamento e confrontos oficiais com atualização de placar ao vivo.
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-zinc-300">
-          <div className="rounded-xl bg-zinc-950/80 border border-zinc-800 px-4 py-2.5 flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-4 text-xs text-zinc-200">
+          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-4 py-2.5 flex items-center gap-2 shadow-lg">
             <Users className="h-4 w-4 text-amber-400" />
-            <span><strong>{teams.length}</strong> Equipes</span>
+            <span><strong className="text-white">{teams.length}</strong> Equipes</span>
           </div>
-          <div className="rounded-xl bg-zinc-950/80 border border-zinc-800 px-4 py-2.5 flex items-center gap-2">
+          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-4 py-2.5 flex items-center gap-2 shadow-lg">
             <Swords className="h-4 w-4 text-amber-400" />
-            <span><strong>{matches.length}</strong> Confrontos</span>
+            <span><strong className="text-white">{matches.length}</strong> Confrontos</span>
           </div>
         </div>
       </div>

@@ -13,10 +13,18 @@ export default function AdminLoginPage({
   searchParams?: Promise<{ redirect?: string }>;
 }) {
   return (
-    <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
-      {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-72 h-72 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-zinc-950">
+      {/* Background artwork with dark vignette */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/hero-cs2.jpg"
+          alt="CS2 Tactical"
+          fill
+          priority
+          className="object-cover opacity-20 brightness-50 contrast-125"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/95" />
+      </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Card */}

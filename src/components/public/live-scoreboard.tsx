@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import {
   Star,
@@ -194,10 +195,19 @@ export function LiveScoreboard({
   return (
     <div className="space-y-6">
       {/* Top Banner do Placar */}
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-[#12161f] shadow-2xl">
-        {/* Glow de fundo */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-[#0d1017] shadow-2xl">
+        {/* Authentic Map Backdrop */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/images/map-mirage.jpg"
+            alt={match.map_name || "Mirage"}
+            fill
+            priority
+            className="object-cover opacity-20 brightness-75 contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0d1017] via-[#0d1017]/85 to-[#0d1017]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d1017] via-transparent to-[#0d1017]/70" />
+        </div>
 
         {/* Top Info Bar */}
         <div className="border-b border-zinc-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">

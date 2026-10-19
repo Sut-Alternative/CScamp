@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import {
   Trophy,
@@ -55,21 +56,31 @@ export default async function HomePage() {
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
       {/* Hero Section */}
-      <section className="relative rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900/90 via-zinc-900/40 to-zinc-950 p-8 sm:p-12 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative rounded-3xl border border-zinc-800 bg-[#0c0e14] p-8 sm:p-14 overflow-hidden shadow-2xl">
+        {/* Authentic CS2 Art Background with dark tactical vignette */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hero-cs2.jpg"
+            alt="CS2 Competitive Arena"
+            fill
+            priority
+            className="object-cover object-right md:object-center opacity-35 brightness-75 contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0c0e14] via-[#0c0e14]/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e14] via-transparent to-[#0c0e14]/50" />
+        </div>
 
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-400">
+        <div className="relative z-10 max-w-2xl space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-md bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-mono font-bold text-amber-400">
             <Flame className="h-3.5 w-3.5 text-amber-400" />
             <span>CORUJÃO CS2 • TRANSMISSÃO EM TEMPO REAL</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight uppercase font-sans">
             Acompanhe cada abate, round e placar ao vivo.
           </h1>
 
-          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
+          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl font-normal">
             Estatísticas instantâneas sincronizadas diretamente do servidor oficial do Counter-Strike 2 via Game State Integration (GSI).
           </p>
         </div>
@@ -103,45 +114,58 @@ export default async function HomePage() {
                 <Link
                   key={m.id}
                   href={`/partidas/${m.gsi_endpoint_slug}`}
-                  className="group rounded-2xl border border-red-500/30 bg-gradient-to-b from-red-950/20 via-zinc-900 to-zinc-950 p-5 hover:border-red-500/60 transition-all shadow-xl block"
+                  className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-[#10131a] p-5 hover:border-amber-500/50 transition-all shadow-xl block"
                 >
-                  <div className="flex items-center justify-between text-xs mb-4">
-                    <span className="font-mono font-bold text-amber-400 uppercase bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                      {m.map_name || "de_mirage"}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-red-400 font-bold text-[11px] bg-red-500/10 border border-red-500/30 px-2 py-0.5 rounded-full">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-ping" />
-                      ROUND {m.current_round}
-                    </span>
+                  {/* Map Backdrop */}
+                  <div className="absolute inset-0 z-0 pointer-events-none">
+                    <Image
+                      src="/images/map-mirage.jpg"
+                      alt={m.map_name || "Mirage"}
+                      fill
+                      className="object-cover opacity-20 group-hover:opacity-30 group-hover:scale-105 transition-all duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#10131a] via-[#10131a]/85 to-transparent" />
                   </div>
 
-                  {/* Placar */}
-                  <div className="flex items-center justify-between py-2">
-                    <div className="flex-1 text-center sm:text-right">
-                      <span className="font-black text-lg text-white block truncate">
-                        {teamA?.name || "Time A"}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between text-xs mb-4">
+                      <span className="font-mono font-bold text-amber-400 uppercase bg-zinc-900/90 px-2 py-0.5 rounded border border-zinc-800">
+                        {m.map_name || "de_mirage"}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-red-400 font-bold text-[11px] bg-red-500/10 border border-red-500/30 px-2 py-0.5 rounded-full">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-ping" />
+                        ROUND {m.current_round}
                       </span>
                     </div>
 
-                    <div className="px-6 font-mono font-black text-3xl text-amber-400 flex items-center gap-2">
-                      <span>{m.team_a_score}</span>
-                      <span className="text-zinc-600 text-lg">:</span>
-                      <span>{m.team_b_score}</span>
+                    {/* Placar */}
+                    <div className="flex items-center justify-between py-2">
+                      <div className="flex-1 text-center sm:text-right">
+                        <span className="font-black text-lg text-white block truncate">
+                          {teamA?.name || "Time A"}
+                        </span>
+                      </div>
+
+                      <div className="px-6 font-mono font-black text-3xl text-amber-400 flex items-center gap-2">
+                        <span>{m.team_a_score}</span>
+                        <span className="text-zinc-600 text-lg">:</span>
+                        <span>{m.team_b_score}</span>
+                      </div>
+
+                      <div className="flex-1 text-center sm:text-left">
+                        <span className="font-black text-lg text-white block truncate">
+                          {teamB?.name || "Time B"}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex-1 text-center sm:text-left">
-                      <span className="font-black text-lg text-white block truncate">
-                        {teamB?.name || "Time B"}
+                    <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400">
+                      <span className="truncate max-w-[200px]">{champ?.name || "Torneio CS2"}</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+                        <span>Assistir Placar</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </span>
                     </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400">
-                    <span className="truncate max-w-[200px]">{champ?.name || "Torneio CS2"}</span>
-                    <span className="inline-flex items-center gap-1 font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
-                      <span>Assistir Placar</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </span>
                   </div>
                 </Link>
               );
