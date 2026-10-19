@@ -39,6 +39,9 @@ export const serverEnv = {
   get supabaseSecretKey() {
     return required("SUPABASE_SECRET_KEY", process.env.SUPABASE_SECRET_KEY);
   },
+  get adminUser() {
+    return process.env.ADMIN_USER ?? "admin_cs_valoroso_2026";
+  },
   get adminPassword() {
     return required("ADMIN_PASSWORD", process.env.ADMIN_PASSWORD);
   },
