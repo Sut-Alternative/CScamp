@@ -82,6 +82,16 @@ Todo o design foi construído seguindo rigorosamente a identidade visual dos mai
     - Estrelas de MVP e Pontuação total.
   - Linha de totais por time (soma de Kills, Assists, Mortes e Score).
 
+### 2.5. Identidade Visual & Arte Autêntica de CS2 (Anti-AI Design)
+- **Logo Oficial CS Valorosos Integrada:**
+  - Vetor SVG da coroa de espinhos dourada e pregos 3D adicionado como favicon nativo em `src/app/icon.svg` e `public/icon.svg`.
+  - Exibição de alta resolução com moldura tática em vidro escuro nos cabeçalhos (`PublicNavbar` e `AdminNavbar`) e no card de login do host.
+- **Substituição de Gradientes Genéricos de IA por Arte Oficial de CS2:**
+  - **Banner Hero da Home:** Ilustração panorâmica de tiroteio tático entre operadores SAS (CT) e Phoenix (TR) no Bombsite B, com névoa volumétrica e iluminação de combate (`/images/hero-cs2.jpg`).
+  - **Cards de Partida e Placar ao Vivo:** Fundo textural do mapa competitivo oficial Mirage A Site (`/images/map-mirage.jpg`) com vinheta tática escura.
+  - **Chaveamento do Campeonato:** Arena oficial de Major de esports com palco, troféu dourado e público de estádio (`/images/esports-arena.jpg`).
+  - **Remoção total de esferas de desfoque radial coloridas ("blur blobs"):** Eliminação completa do padrão característico de templates genéricos gerados por IA.
+
 ---
 
 ## 3. Guia de Deploy na Vercel (Passo a Passo)
