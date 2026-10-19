@@ -335,11 +335,17 @@ export default async function HomePage() {
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">Chaveamento oficial</span>
+                  <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between gap-2">
+                    <Link
+                      href={`/museu/${champ.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 transition-all"
+                    >
+                      <Trophy className="h-3.5 w-3.5" />
+                      <span>Museu Oficial</span>
+                    </Link>
                     <Link
                       href={`/campeonatos/${champ.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 group-hover:translate-x-0.5 transition-all"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-200 hover:text-white group-hover:translate-x-0.5 transition-all"
                     >
                       <span>Ver Chaveamento</span>
                       <ArrowRight className="h-3.5 w-3.5" />

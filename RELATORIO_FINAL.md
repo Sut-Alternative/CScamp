@@ -116,6 +116,26 @@ Implementadas especificamente para garantir estabilidade absoluta durante as par
 10. **Resultados Recentes na Home & Exportação CSV:**
     - Seção de "Resultados Recentes" na página inicial com partidas já concluídas e botão de download de estatísticas em `.csv` no placar para relatórios e premiações.
 
+### 2.7. Museu & Hall da Fama Oficial (`/museu/[id]`) e Biblioteca xplay.gg
+Uma rota pública dedicada e definitiva para eternizar cada campeonato após o seu término:
+
+1. **Endereço Dedicado e Compartilhável (`/museu/[id]`):**
+   - Utiliza o mesmo identificador do torneio, permitindo compartilhamento direto da página pós-torneio com a comunidade.
+2. **Pódio dos Campeões:**
+   - Destaque em ouro e prata para a equipe campeã e vice-campeã com logos oficiais e escalação completa dos atletas.
+3. **Os 4 Troféus de Honra Individuais (HLTV-style):**
+   - 👑 **MVP do Torneio:** Jogador com maior pontuação geral e impacto acumulado.
+   - ⚔️ **Top Fragger:** Maior quantidade absoluta de abates somando todas as partidas.
+   - 🎯 **Rei do Headshot:** Maior taxa de precisão (`HS%`) do campeonato.
+   - 💥 **Damage Machine:** Maior dano médio por round (`ADR`) do torneio.
+4. **Ranking Geral Consolidado (1º ao 20º+):**
+   - Tabela classificatória oficial unificando todos os atletas com PJ, Kills, Deaths, +/-, K/D Ratio, ADR, HS%, MVPs e Score.
+5. **Galeria de Highlights & Clipes (xplay.gg):**
+   - Suporte para reprodução de clipes do xplay.gg, vídeos diretos (.mp4) e YouTube com player embutido e modal interativo sem sair da página.
+   - Gerenciador administrativo (`HighlightManager`) no painel do host para colar novos links de lances a qualquer momento.
+6. **Exportação Oficial em CSV:**
+   - Download imediato da planilha com todas as métricas consolidadas dos atletas do campeonato.
+
 ---
 
 ## 3. Guia de Deploy na Vercel (Passo a Passo)

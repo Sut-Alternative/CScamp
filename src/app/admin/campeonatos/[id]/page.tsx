@@ -15,6 +15,8 @@ import { GsiModal } from "@/components/admin/gsi-modal";
 import { MatchControlModal } from "@/components/admin/match-control-modal";
 import { AdminNavbar } from "@/components/admin/navbar";
 import { ChampionshipStatusSelect } from "@/components/admin/championship-status-select";
+import { HighlightManager } from "@/components/admin/highlight-manager";
+import { getChampionshipHighlights } from "@/lib/highlights";
 import {
   ArrowLeft,
   Users,
@@ -25,6 +27,7 @@ import {
   Play,
   CheckCircle2,
   Radio,
+  Trophy,
 } from "lucide-react";
 import type { ChampionshipStatus, MatchStatus } from "@/types/database";
 
@@ -96,6 +99,9 @@ export default async function AdminChampionshipPage({
   const teamMap = new Map<string, string>();
   teams.forEach((t) => teamMap.set(t.id, t.name));
 
+  // Highlights cadastrados
+  const highlights = await getChampionshipHighlights(id);
+
   return (
     <>
       <AdminNavbar />
@@ -131,6 +137,16 @@ export default async function AdminChampionshipPage({
               currentStatus={championship.status}
             />
           </div>
+
+          {/* Link para o museu */}
+          <Link
+            href={`/museu/${championship.id}`}
+            target="_blank"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 hover:border-amber-400 transition-colors"
+          >
+            <Trophy className="h-3.5 w-3.5 text-amber-400" />
+            <span>Ver Museu</span>
+          </Link>
 
           {/* Link para o chaveamento público */}
           <Link
@@ -611,6 +627,12 @@ export default async function AdminChampionshipPage({
           </div>
         </div>
       </div>
+
+      {/* Seção: Gerenciamento de Highlights & Clipes (xplay.gg) */}
+      <HighlightManager
+        championshipId={championship.id}
+        initialHighlights={highlights}
+      />
     </main>
     </>
   );

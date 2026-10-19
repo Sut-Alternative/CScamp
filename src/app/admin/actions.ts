@@ -443,6 +443,62 @@ export async function advanceWinnerToMatchAction(
 
   revalidatePath(`/admin/campeonatos/${championshipId}`);
   revalidatePath(`/campeonatos/${championshipId}`);
+  revalidatePath(`/museu/${championshipId}`);
   revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Criação de destaque/vídeo do campeonato (xplay.gg / YouTube / etc.)
+ */
+export async function createHighlightAction(
+  prevState: ActionResponse | null,
+  formData: FormData,
+): Promise<ActionResponse> {
+  await requireAdminSession();
+
+  const championshipId = formData.get("championship_id")?.toString();
+  const title = formData.get("title")?.toString().trim();
+  const videoUrl = formData.get("video_url")?.toString().trim();
+  const playerName = formData.get("player_name")?.toString().trim() || null;
+  const description = formData.get("description")?.toString().trim() || null;
+  const roundRaw = formData.get("round_number")?.toString();
+  const roundNumber = roundRaw ? parseInt(roundRaw, 10) : null;
+
+  if (!championshipId || !title || !videoUrl) {
+    return { error: "Informe o título do lance e a URL do vídeo/clipe." };
+  }
+
+  const { saveChampionshipHighlight } = await import("@/lib/highlights");
+  await saveChampionshipHighlight({
+    championship_id: championshipId,
+    title,
+    video_url: videoUrl,
+    player_name: playerName,
+    description,
+    round_number: roundNumber && !isNaN(roundNumber) ? roundNumber : null,
+  });
+
+  revalidatePath(`/admin/campeonatos/${championshipId}`);
+  revalidatePath(`/museu/${championshipId}`);
+  revalidatePath(`/campeonatos/${championshipId}`);
+  return { success: true };
+}
+
+/**
+ * Exclusão de destaque do campeonato
+ */
+export async function deleteHighlightAction(
+  highlightId: string,
+  championshipId: string,
+): Promise<ActionResponse> {
+  await requireAdminSession();
+
+  const { deleteChampionshipHighlight } = await import("@/lib/highlights");
+  await deleteChampionshipHighlight(highlightId, championshipId);
+
+  revalidatePath(`/admin/campeonatos/${championshipId}`);
+  revalidatePath(`/museu/${championshipId}`);
+  revalidatePath(`/campeonatos/${championshipId}`);
   return { success: true };
 }

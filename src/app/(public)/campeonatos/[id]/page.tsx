@@ -10,6 +10,7 @@ import {
   ExternalLink,
   CheckCircle2,
   Clock,
+  ChevronRight,
 } from "lucide-react";
 import type { ChampionshipStatus, MatchStatus } from "@/types/database";
 
@@ -137,16 +138,48 @@ export default async function ChampionshipBracketPage({
           </p>
         </div>
 
-        <div className="relative z-10 flex items-center gap-4 text-xs text-zinc-200">
-          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-4 py-2.5 flex items-center gap-2 shadow-lg">
+        <div className="relative z-10 flex flex-wrap items-center gap-3 text-xs text-zinc-200">
+          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-3.5 py-2 flex items-center gap-2 shadow-lg">
             <Users className="h-4 w-4 text-amber-400" />
             <span><strong className="text-white">{teams.length}</strong> Equipes</span>
           </div>
-          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-4 py-2.5 flex items-center gap-2 shadow-lg">
+          <div className="rounded-xl bg-zinc-950/90 border border-zinc-800 px-3.5 py-2 flex items-center gap-2 shadow-lg">
             <Swords className="h-4 w-4 text-amber-400" />
             <span><strong className="text-white">{matches.length}</strong> Confrontos</span>
           </div>
+          <Link
+            href={`/museu/${championship.id}`}
+            className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 flex items-center gap-2 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 transition-all hover:scale-105"
+          >
+            <Trophy className="h-4 w-4" />
+            <span>Museu Oficial</span>
+          </Link>
         </div>
+      </div>
+
+      {/* Banner de Acesso ao Museu / Hall da Fama */}
+      <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-950/30 via-zinc-900 to-zinc-950 p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
+            <Trophy className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-sm sm:text-base">
+              Museu & Hall da Fama Oficial
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Confira o ranking dos 20 melhores jogadores, o pódio dos campeões e a biblioteca de melhores momentos (xplay.gg).
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href={`/museu/${championship.id}`}
+          className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-amber-400 transition-all shadow-md shadow-amber-500/20 shrink-0"
+        >
+          <span>Acessar Museu</span>
+          <ChevronRight className="h-4 w-4" />
+        </Link>
       </div>
 
       {/* CHAVEAMENTO / BRACKETS */}
