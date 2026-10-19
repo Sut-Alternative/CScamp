@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { serverEnv } from "@/lib/env";
 import { setAdminSessionCookie, removeAdminSessionCookie, requireAdminSession } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ChampionshipStatus, MatchStatus } from "@/types/database";
+import type { ChampionshipStatus, MatchStatus, Database } from "@/types/database";
+
+type MatchUpdate = Database["public"]["Tables"]["matches"]["Update"];
 
 export interface ActionResponse {
   success?: boolean;
@@ -330,5 +332,117 @@ export async function deleteMatchAction(
   }
 
   revalidatePath(`/admin/campeonatos/${championshipId}`);
+  return { success: true };
+}
+
+/**
+ * Ajuste manual de emergência (placar, round, mapa e status)
+ * Para quando o host precisar corrigir rounds após mp_backup_restore ou queda de energia.
+ */
+export async function overrideMatchScoreAction(
+  matchId: string,
+  championshipId: string,
+  teamAScore: number,
+  teamBScore: number,
+  currentRound: number,
+  status?: MatchStatus,
+  mapName?: string,
+): Promise<ActionResponse> {
+  await requireAdminSession();
+
+  const supabase = createAdminClient();
+  const updateData: MatchUpdate = {
+    team_a_score: Math.max(0, teamAScore),
+    team_b_score: Math.max(0, teamBScore),
+    current_round: Math.max(0, currentRound),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status) updateData.status = status;
+  if (mapName) updateData.map_name = mapName;
+
+  const { error } = await supabase
+    .from("matches")
+    .update(updateData)
+    .eq("id", matchId);
+
+  if (error) {
+    return { error: `Erro ao ajustar placar manual: ${error.message}` };
+  }
+
+  revalidatePath(`/admin/campeonatos/${championshipId}`);
+  revalidatePath(`/partidas/[slug]`, "layout");
+  revalidatePath(`/campeonatos/${championshipId}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Zera estatísticas e reinicia a partida para 0x0
+ * Útil quando os times jogaram aquecimento e o host quer recomeçar limpo.
+ */
+export async function resetMatchStatsAction(
+  matchId: string,
+  championshipId: string,
+): Promise<ActionResponse> {
+  await requireAdminSession();
+
+  const supabase = createAdminClient();
+
+  // 1. Apaga estatísticas de jogadores da partida
+  await supabase.from("match_stats").delete().eq("match_id", matchId);
+
+  // 2. Reseta o placar e round
+  const { error } = await supabase
+    .from("matches")
+    .update({
+      team_a_score: 0,
+      team_b_score: 0,
+      current_round: 0,
+      status: "scheduled",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", matchId);
+
+  if (error) {
+    return { error: `Erro ao reiniciar partida: ${error.message}` };
+  }
+
+  revalidatePath(`/admin/campeonatos/${championshipId}`);
+  revalidatePath(`/partidas/[slug]`, "layout");
+  revalidatePath(`/campeonatos/${championshipId}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Avança o time vencedor para uma partida seguinte no chaveamento
+ */
+export async function advanceWinnerToMatchAction(
+  targetMatchId: string,
+  targetSlot: "team_a_id" | "team_b_id",
+  winnerTeamId: string,
+  championshipId: string,
+): Promise<ActionResponse> {
+  await requireAdminSession();
+
+  const supabase = createAdminClient();
+  const updateData: MatchUpdate =
+    targetSlot === "team_a_id"
+      ? { team_a_id: winnerTeamId, updated_at: new Date().toISOString() }
+      : { team_b_id: winnerTeamId, updated_at: new Date().toISOString() };
+
+  const { error } = await supabase
+    .from("matches")
+    .update(updateData)
+    .eq("id", targetMatchId);
+
+  if (error) {
+    return { error: `Erro ao avançar vencedor na chave: ${error.message}` };
+  }
+
+  revalidatePath(`/admin/campeonatos/${championshipId}`);
+  revalidatePath(`/campeonatos/${championshipId}`);
+  revalidatePath("/");
   return { success: true };
 }

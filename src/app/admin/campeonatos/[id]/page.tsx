@@ -12,6 +12,7 @@ import {
   deleteMatchAction,
 } from "@/app/admin/actions";
 import { GsiModal } from "@/components/admin/gsi-modal";
+import { MatchControlModal } from "@/components/admin/match-control-modal";
 import { AdminNavbar } from "@/components/admin/navbar";
 import { ChampionshipStatusSelect } from "@/components/admin/championship-status-select";
 import {
@@ -76,6 +77,8 @@ export default async function AdminChampionshipPage({
         gsi_endpoint_slug,
         bracket_round,
         bracket_position,
+        current_round,
+        updated_at,
         credentials:match_gsi_credentials(auth_token)
       )
     `)
@@ -508,12 +511,43 @@ export default async function AdminChampionshipPage({
 
                       {/* Rodapé: Slug GSI, Ações e Modal */}
                       <div className="mt-3 pt-3 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-2 text-xs">
-                        <div className="font-mono text-[11px] text-zinc-400 flex items-center gap-1">
-                          <Radio className="h-3.5 w-3.5 text-emerald-400" />
-                          <span>/api/gsi/{match.gsi_endpoint_slug}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="font-mono text-[11px] text-zinc-400 flex items-center gap-1">
+                            <Radio className="h-3.5 w-3.5 text-emerald-400" />
+                            <span>/api/gsi/{match.gsi_endpoint_slug}</span>
+                          </div>
+                          {match.status === "live" && (
+                            <span className="inline-flex items-center gap-1 font-mono text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                              GSI Ativo
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2">
+                          {/* Modal de Controle e Emergência */}
+                          <MatchControlModal
+                            match={{
+                              id: match.id,
+                              championship_id: championship.id,
+                              map_name: match.map_name,
+                              team_a_score: match.team_a_score,
+                              team_b_score: match.team_b_score,
+                              current_round: match.current_round,
+                              status: match.status,
+                              gsi_endpoint_slug: match.gsi_endpoint_slug,
+                              updated_at: match.updated_at,
+                            }}
+                            teamA={{ id: match.team_a_id, name: teamAName }}
+                            teamB={{ id: match.team_b_id, name: teamBName }}
+                            allChampionshipMatches={matches.map((m) => ({
+                              id: m.id,
+                              bracket_round: m.bracket_round,
+                              team_a: teamMap.get(m.team_a_id) ? { name: teamMap.get(m.team_a_id)! } : null,
+                              team_b: teamMap.get(m.team_b_id) ? { name: teamMap.get(m.team_b_id)! } : null,
+                            }))}
+                          />
+
                           {/* Botão de Modal GSI CFG */}
                           <GsiModal
                             slug={match.gsi_endpoint_slug}

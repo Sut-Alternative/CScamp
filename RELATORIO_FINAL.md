@@ -92,6 +92,30 @@ Todo o design foi construído seguindo rigorosamente a identidade visual dos mai
   - **Chaveamento do Campeonato:** Arena oficial de Major de esports com palco, troféu dourado e público de estádio (`/images/esports-arena.jpg`).
   - **Remoção total de esferas de desfoque radial coloridas ("blur blobs"):** Eliminação completa do padrão característico de templates genéricos gerados por IA.
 
+### 2.6. As 10 Melhorias de Confiabilidade & Monitoramento Blindado (Zero Fatalidades)
+Implementadas especificamente para garantir estabilidade absoluta durante as partidas ao vivo no campeonato presencial/online:
+
+1. **Proteção Contra Poluição de Aquecimento (`warmup`):**
+   - O endpoint GSI (`POST /api/gsi/[slug]`) filtra e descarta abates, mortes e pontuações enquanto `map.phase === "warmup"`. As estatísticas só começam a ser gravadas quando a partida é iniciada oficialmente (`live`).
+2. **Resiliência a Reinício do Servidor (`mp_restartgame` / `backup_restore`):**
+   - Se o host do servidor executar `mp_restartgame 1` ou restaurar um backup de round no meio do jogo, o backend detecta a redefinição de rounds e limpa os acumuladores em memória para impedir duplicação de pontuação.
+3. **Painel de Intervenção Manual de Emergência (Score Override):**
+   - Modal acessível no card de cada partida no painel administrativo (`MatchControlModal`) permitindo que o host corrija manualmente com 1 clique o placar de cada equipe, round atual, mapa ou status, sem depender do GSI caso a internet do servidor oscile.
+4. **Botão de Reset Completo da Partida (0x0 Limpo):**
+   - Opção com confirmação de segurança para zerar placar, limpar tabela `match_stats` e voltar a partida para o status `scheduled`.
+5. **Diagnóstico & Heartbeat em Tempo Real do GSI:**
+   - Indicador de latência no painel do host exibindo os segundos transcorridos desde o último pacote GSI recebido (Verde = Conectado há <15s, Amarelo = Alerta 15-60s, Vermelho = Servidor offline/parado).
+6. **Avanço Rápido de Vencedores na Chave (Bracket Progression):**
+   - No modal de controle, o host pode selecionar o time vencedor e avançá-lo diretamente para a próxima partida da chave com 1 clique.
+7. **Sintetizador de Alertas Táticos Sonoros (Web Audio API):**
+   - Efeitos sonoros acústicos sintéticos de vitória de round disparados no placar ao vivo (sem dependência de arquivos externos ou falhas de carregamento), com botão de alternância `[🔊 Sons / 🔇 Mudo]`.
+8. **Rastreamento de Lados CT vs TR e Halftime (MR12):**
+   - Badges visuais dinâmicos indicando quem está no lado Defensor (CT) e Atacante (TR), com inversão automática no 13º round (troca de lados do MR12).
+9. **Visualização Mobile com Coluna Fixa (Sticky Mobile Table):**
+   - A coluna de nomes dos jogadores permanece fixada à esquerda enquanto as estatísticas (K, D, A, +/-, ADR, HS%) deslizam suavemente na horizontal em smartphones.
+10. **Resultados Recentes na Home & Exportação CSV:**
+    - Seção de "Resultados Recentes" na página inicial com partidas já concluídas e botão de download de estatísticas em `.csv` no placar para relatórios e premiações.
+
 ---
 
 ## 3. Guia de Deploy na Vercel (Passo a Passo)

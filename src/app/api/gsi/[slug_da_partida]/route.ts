@@ -112,14 +112,33 @@ export async function POST(
   }
 
   // Determina status da partida a partir da fase do mapa
+  const mapPhase = payload.map?.phase;
   let matchStatus = match.status;
-  if (payload.map?.phase === "gameover") {
+
+  if (mapPhase === "gameover") {
     matchStatus = "finished";
-  } else if (payload.map?.phase === "live" && match.status === "scheduled") {
+  } else if ((mapPhase === "live" || mapPhase === "intermission") && match.status === "scheduled") {
     matchStatus = "live";
   }
 
   const currentRound = payload.map?.round ?? match.current_round ?? 0;
+
+  // Se estiver em fase de AQUECIMENTO (warmup), apenas atualiza o mapa e o heartbeat
+  if (mapPhase === "warmup") {
+    await supabase
+      .from("matches")
+      .update({
+        map_name: payload.map?.name || match.map_name,
+      })
+      .eq("id", match.id);
+
+    return Response.json({
+      ok: true,
+      phase: "warmup",
+      message: "Aquecimento detectado. Estatísticas não poluídas.",
+      match_id: match.id,
+    });
+  }
 
   // 6. Atualiza a tabela matches
   await supabase
@@ -175,6 +194,16 @@ export async function POST(
 
     // Headshots: se houver aumento de kills com round_killhs presente
     let headshots = existing?.headshots || 0;
+    let totalDamage = existing?.total_damage || 0;
+
+    // Se houve reset no servidor (ex: mp_restartgame ou round restore), reseta acumuladores
+    if (matchStats.kills < (existing?.kills || 0) || currentRound <= 1) {
+      if (matchStats.kills === 0) {
+        headshots = 0;
+        totalDamage = 0;
+      }
+    }
+
     if (playerState?.round_killhs && playerState.round_killhs > 0) {
       // Se as kills aumentaram, garante que headshots não ultrapassem as kills
       const newKills = matchStats.kills;
@@ -189,7 +218,6 @@ export async function POST(
     }
 
     // Dano acumulado e ADR
-    let totalDamage = existing?.total_damage || 0;
     if (playerState?.round_totaldmg && playerState.round_totaldmg > 0) {
       // Se mudou de round, acumula o dano
       if (currentRound > (match.current_round || 0)) {

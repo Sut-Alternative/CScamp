@@ -53,6 +53,24 @@ export default async function HomePage() {
     `)
     .order("created_at", { ascending: false });
 
+  // 3. Busca partidas recém-finalizadas (Resultados)
+  const { data: recentMatches } = await supabase
+    .from("matches")
+    .select(`
+      id,
+      gsi_endpoint_slug,
+      map_name,
+      team_a_score,
+      team_b_score,
+      status,
+      team_a:teams!team_a_id(id, name, logo_url),
+      team_b:teams!team_b_id(id, name, logo_url),
+      championship:championships!championship_id(id, name)
+    `)
+    .eq("status", "finished")
+    .order("updated_at", { ascending: false })
+    .limit(4);
+
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
       {/* Hero Section */}
@@ -166,6 +184,86 @@ export default async function HomePage() {
                         <ArrowRight className="h-3.5 w-3.5" />
                       </span>
                     </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* SEÇÃO: Resultados Recentes */}
+      {recentMatches && recentMatches.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <h2 className="text-lg font-black text-white uppercase tracking-wider">
+                Resultados Recentes
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">Últimos confrontos</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recentMatches.map((m) => {
+              const teamA = m.team_a as unknown as { id: string; name: string; logo_url: string | null } | null;
+              const teamB = m.team_b as unknown as { id: string; name: string; logo_url: string | null } | null;
+              const champ = m.championship as unknown as { id: string; name: string } | null;
+              const aWon = m.team_a_score > m.team_b_score;
+              const bWon = m.team_b_score > m.team_a_score;
+
+              return (
+                <Link
+                  key={m.id}
+                  href={`/partidas/${m.gsi_endpoint_slug}`}
+                  className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 hover:border-zinc-700 transition-all block group"
+                >
+                  <div className="flex items-center justify-between text-xs mb-3 text-zinc-400">
+                    <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 uppercase text-zinc-300">
+                      {m.map_name || "de_mirage"}
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-mono">Finalizada</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1">
+                    <div className="flex-1 text-right">
+                      <span
+                        className={`font-bold text-sm truncate block ${
+                          aWon ? "text-amber-400 font-black" : "text-zinc-300"
+                        }`}
+                      >
+                        {teamA?.name || "Time A"}
+                      </span>
+                    </div>
+
+                    <div className="px-5 font-mono font-black text-2xl text-white flex items-center gap-2">
+                      <span className={aWon ? "text-amber-400" : "text-zinc-400"}>
+                        {m.team_a_score}
+                      </span>
+                      <span className="text-zinc-600 text-sm">:</span>
+                      <span className={bWon ? "text-amber-400" : "text-zinc-400"}>
+                        {m.team_b_score}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 text-left">
+                      <span
+                        className={`font-bold text-sm truncate block ${
+                          bWon ? "text-amber-400 font-black" : "text-zinc-300"
+                        }`}
+                      >
+                        {teamB?.name || "Time B"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-zinc-850 flex items-center justify-between text-[11px] text-zinc-500">
+                    <span className="truncate">{champ?.name || "Campeonato"}</span>
+                    <span className="text-amber-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                      <span>Ver Placar</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </span>
                   </div>
                 </Link>
               );

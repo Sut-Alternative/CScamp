@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -9,6 +9,11 @@ import {
   CheckCircle2,
   Share2,
   Check,
+  Volume2,
+  VolumeX,
+  Download,
+  Shield,
+  Crosshair,
 } from "lucide-react";
 import type { Match, MatchStats, Player, Team } from "@/types/database";
 
@@ -36,6 +41,37 @@ export function LiveScoreboard({
   const [stats, setStats] = useState<MatchStats[]>(initialStats);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  // Sintetizador Web Audio API para alertas sonoros táticos (sem dependências externas)
+  const playTacticalAlert = () => {
+    if (typeof window === "undefined") return;
+    try {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.25);
+    } catch {
+      // Audio context browser policy
+    }
+  };
 
   // Inscrição no Supabase Realtime (WebSockets)
   useEffect(() => {
@@ -53,10 +89,20 @@ export function LiveScoreboard({
         },
         (payload) => {
           if (payload.new) {
-            setMatch((prev) => ({
-              ...prev,
-              ...(payload.new as Match),
-            }));
+            const updated = payload.new as Match;
+            setMatch((prev) => {
+              if (
+                soundEnabledRef.current &&
+                (updated.team_a_score !== prev.team_a_score ||
+                  updated.team_b_score !== prev.team_b_score)
+              ) {
+                playTacticalAlert();
+              }
+              return {
+                ...prev,
+                ...updated,
+              };
+            });
           }
         },
       )
@@ -190,7 +236,64 @@ export function LiveScoreboard({
     }
   };
 
+  const handleExportCsv = () => {
+    const headers = [
+      "Time",
+      "Jogador",
+      "SteamID64",
+      "Kills",
+      "Assists",
+      "Deaths",
+      "Saldo",
+      "ADR",
+      "HS%",
+      "MVPs",
+      "Pontos",
+    ];
+    const rows = [
+      ...teamAStats.map((s) => [
+        `"${match.team_a.name}"`,
+        `"${s.player.name}"`,
+        `"${s.player.steam_id}"`,
+        s.kills,
+        s.assists,
+        s.deaths,
+        s.kills - s.deaths,
+        s.adr,
+        s.kills > 0 ? ((s.headshots / s.kills) * 100).toFixed(0) + "%" : "0%",
+        s.mvps,
+        s.score,
+      ]),
+      ...teamBStats.map((s) => [
+        `"${match.team_b.name}"`,
+        `"${s.player.name}"`,
+        `"${s.player.steam_id}"`,
+        s.kills,
+        s.assists,
+        s.deaths,
+        s.kills - s.deaths,
+        s.adr,
+        s.kills > 0 ? ((s.headshots / s.kills) * 100).toFixed(0) + "%" : "0%",
+        s.mvps,
+        s.score,
+      ]),
+    ];
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `placar-${match.map_name || "cs2"}-${match.team_a.name}-vs-${match.team_b.name}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const isLive = match.status === "live";
+  const isSecondHalf = match.current_round > 12;
 
   return (
     <div className="space-y-6">
@@ -234,15 +337,48 @@ export function LiveScoreboard({
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-zinc-400 font-mono text-[11px]">
+          <div className="flex items-center gap-2 sm:gap-3 text-zinc-400 font-mono text-[11px]">
             <div className="flex items-center gap-1.5">
               <span
                 className={`h-2 w-2 rounded-full ${
                   isLiveConnected ? "bg-emerald-500 animate-pulse" : "bg-zinc-600"
                 }`}
               />
-              <span>{isLiveConnected ? "GSI Realtime Ativo" : "Conectando..."}</span>
+              <span className="hidden sm:inline">
+                {isLiveConnected ? "GSI Realtime Ativo" : "Conectando..."}
+              </span>
             </div>
+
+            {/* Toggle de Som */}
+            <button
+              onClick={() => {
+                setSoundEnabled((prev) => !prev);
+                if (!soundEnabled) playTacticalAlert();
+              }}
+              className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors ${
+                soundEnabled
+                  ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
+              }`}
+              title="Alertas sonoros táticos em cada round"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3.5 w-3.5 text-amber-400" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5" />
+              )}
+              <span className="hidden md:inline">{soundEnabled ? "Sons Ativos" : "Sem Som"}</span>
+            </button>
+
+            {/* Baixar CSV */}
+            <button
+              onClick={handleExportCsv}
+              className="inline-flex items-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-2.5 py-1 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+              title="Baixar estatísticas em planilha CSV"
+            >
+              <Download className="h-3 w-3" />
+              <span className="hidden md:inline">Exportar CSV</span>
+            </button>
 
             <button
               onClick={handleShare}
@@ -271,9 +407,27 @@ export function LiveScoreboard({
                 )}
               </div>
             </div>
-            <span className="text-[11px] font-mono tracking-wider font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-              EQUIPE A
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 text-[11px] font-mono tracking-wider font-bold px-2 py-0.5 rounded border ${
+                  isSecondHalf
+                    ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
+                    : "text-blue-400 bg-blue-500/10 border-blue-500/30"
+                }`}
+              >
+                {isSecondHalf ? (
+                  <>
+                    <Crosshair className="h-3 w-3" />
+                    <span>TERRORISTAS (TR)</span>
+                  </>
+                ) : (
+                  <>
+                    <Shield className="h-3 w-3" />
+                    <span>CONTRA-TERRORISTAS (CT)</span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
 
           {/* Placar Numérico */}
@@ -296,7 +450,13 @@ export function LiveScoreboard({
               </span>
             </div>
             <span className="text-[10px] font-mono tracking-widest uppercase text-zinc-500">
-              {match.status === "finished" ? "PLACAR FINAL" : "TEMPO REAL (GSI)"}
+              {match.status === "finished"
+                ? "PLACAR FINAL"
+                : match.current_round > 24
+                ? "PRORROGAÇÃO (OVERTIME)"
+                : match.current_round > 12
+                ? "2º TEMPO • TROCA DE LADOS"
+                : "1º TEMPO • MR12"}
             </span>
           </div>
 
@@ -315,9 +475,27 @@ export function LiveScoreboard({
                 {match.team_b.name}
               </span>
             </div>
-            <span className="text-[11px] font-mono tracking-wider font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-              EQUIPE B
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 text-[11px] font-mono tracking-wider font-bold px-2 py-0.5 rounded border ${
+                  isSecondHalf
+                    ? "text-blue-400 bg-blue-500/10 border-blue-500/30"
+                    : "text-amber-400 bg-amber-500/10 border-amber-500/30"
+                }`}
+              >
+                {isSecondHalf ? (
+                  <>
+                    <Shield className="h-3 w-3" />
+                    <span>CONTRA-TERRORISTAS (CT)</span>
+                  </>
+                ) : (
+                  <>
+                    <Crosshair className="h-3 w-3" />
+                    <span>TERRORISTAS (TR)</span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -384,7 +562,7 @@ function ScoreboardTable({
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-zinc-800/80 bg-zinc-950/60 font-mono text-[11px] uppercase tracking-wider text-zinc-400">
-              <th className="py-3 px-4 font-bold text-zinc-300">Jogador</th>
+              <th className="py-3 px-4 font-bold text-zinc-300 sticky left-0 bg-[#0d1017] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">Jogador</th>
               <th className="py-3 px-3 text-center font-bold text-white">K</th>
               <th className="py-3 px-3 text-center font-bold text-zinc-300">A</th>
               <th className="py-3 px-3 text-center font-bold text-zinc-400">D</th>
@@ -412,8 +590,8 @@ function ScoreboardTable({
                     key={stat.player_id}
                     className="hover:bg-zinc-800/20 transition-colors group"
                   >
-                    {/* Jogador */}
-                    <td className="py-3 px-4">
+                    {/* Jogador (Sticky no mobile) */}
+                    <td className="py-3 px-4 sticky left-0 bg-[#10131a] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                       <div className="flex items-center gap-2.5 font-sans">
                         <span className="text-zinc-600 font-mono text-[11px] w-4">{idx + 1}</span>
                         <div className="h-7 w-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-amber-400">
@@ -504,7 +682,7 @@ function ScoreboardTable({
           {playerStats.length > 0 && (
             <tfoot>
               <tr className="border-t border-zinc-800 bg-zinc-950/80 font-mono text-xs font-bold">
-                <td className="py-2.5 px-4 font-sans uppercase text-[11px] tracking-wider text-zinc-400">
+                <td className="py-2.5 px-4 font-sans uppercase text-[11px] tracking-wider text-zinc-400 sticky left-0 bg-[#0d1017] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">
                   Total da Equipe
                 </td>
                 <td className="py-2.5 px-3 text-center text-white">{totals.kills}</td>
