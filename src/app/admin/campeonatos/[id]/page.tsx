@@ -10,10 +10,10 @@ import {
   createMatchAction,
   updateMatchStatusAction,
   deleteMatchAction,
-  updateChampionshipStatusAction,
 } from "@/app/admin/actions";
 import { GsiModal } from "@/components/admin/gsi-modal";
 import { AdminNavbar } from "@/components/admin/navbar";
+import { ChampionshipStatusSelect } from "@/components/admin/championship-status-select";
 import {
   ArrowLeft,
   Users,
@@ -119,26 +119,13 @@ export default async function AdminChampionshipPage({
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Status switcher */}
-          <form
-            action={async (formData: FormData) => {
-              "use server";
-              const newStatus = formData.get("status") as ChampionshipStatus;
-              await updateChampionshipStatusAction(championship.id, newStatus);
-            }}
-            className="flex items-center gap-2"
-          >
-            <label className="text-xs font-semibold text-zinc-400">Status:</label>
-            <select
-              name="status"
-              defaultValue={championship.status}
-              onChange={(e) => e.target.form?.requestSubmit()}
-              className="text-xs bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-amber-500 font-medium"
-            >
-              <option value="pending">Pendente</option>
-              <option value="active">Ativo (Em jogo)</option>
-              <option value="finished">Finalizado</option>
-            </select>
-          </form>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-zinc-400">Status:</span>
+            <ChampionshipStatusSelect
+              championshipId={championship.id}
+              currentStatus={championship.status}
+            />
+          </div>
 
           {/* Link para o chaveamento público */}
           <Link

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createChampionshipAction, updateChampionshipStatusAction, deleteChampionshipAction } from "./actions";
+import { createChampionshipAction, deleteChampionshipAction } from "./actions";
 import { Trophy, Plus, Users, Swords, Calendar, ArrowRight, CheckCircle2, Clock, Trash2 } from "lucide-react";
 import { AdminNavbar } from "@/components/admin/navbar";
+import { ChampionshipStatusSelect } from "@/components/admin/championship-status-select";
 import type { ChampionshipStatus } from "@/types/database";
 
 export const metadata = {
@@ -198,26 +199,11 @@ export default async function AdminDashboardPage() {
 
                   {/* Footer actions */}
                   <div className="mt-5 pt-4 border-t border-zinc-800/60 flex items-center justify-between gap-2">
-                    {/* Status switcher form */}
-                    <form
-                      action={async (formData: FormData) => {
-                        "use server";
-                        const newStatus = formData.get("status") as ChampionshipStatus;
-                        await updateChampionshipStatusAction(champ.id, newStatus);
-                      }}
-                      className="flex items-center gap-1"
-                    >
-                      <select
-                        name="status"
-                        defaultValue={champ.status}
-                        onChange={(e) => e.target.form?.requestSubmit()}
-                        className="text-xs bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-300 focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="pending">Pendente</option>
-                        <option value="active">Ativo (Em jogo)</option>
-                        <option value="finished">Finalizado</option>
-                      </select>
-                    </form>
+                    {/* Status switcher */}
+                    <ChampionshipStatusSelect
+                      championshipId={champ.id}
+                      currentStatus={champ.status}
+                    />
 
                     <Link
                       href={`/admin/campeonatos/${champ.id}`}
