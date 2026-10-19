@@ -37,6 +37,8 @@ const CS2_MAPS = [
   "de_vertigo",
 ];
 
+export const instant = false;
+
 export default async function AdminChampionshipPage({
   params,
 }: {

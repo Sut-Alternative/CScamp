@@ -16,6 +16,8 @@ export const metadata = {
   description: "Acompanhe campeonatos de Counter-Strike 2 em tempo real com placar e estatísticas do GSI oficial da Valve.",
 };
 
+export const instant = false;
+
 export default async function HomePage() {
   const supabase = await createClient();
 

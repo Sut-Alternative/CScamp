@@ -10,6 +10,8 @@ export const metadata = {
   title: "Painel do Host — Campeonatos",
 };
 
+export const instant = false;
+
 export default async function AdminDashboardPage() {
   const supabase = createAdminClient();
 
