@@ -1,5 +1,9 @@
+export const instant = false;
+
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
-  // Navegação do painel admin entra aqui na etapa de frontend.
-  // A proteção por senha é feita em src/proxy.ts + checagem nas Server Actions.
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100">
+      <div className="flex-1 flex flex-col">{children}</div>
+    </div>
+  );
 }

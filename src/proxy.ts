@@ -1,28 +1,33 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth-token";
 
-/**
- * Proxy (antigo "middleware" — renomeado no Next.js 16).
- *
- * Responsável por barrar acesso não autenticado ao /admin, redirecionando
- * para /admin/login. A checagem real do cookie de sessão será implementada
- * na etapa de autenticação.
- *
- * IMPORTANTE: o proxy é só a primeira barreira. Toda Server Action do admin
- * também deve validar a sessão (Server Actions são POSTs na própria rota).
- */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Permitir acesso à tela de login
   if (pathname === "/admin/login") {
+    // Se já estiver logado, redireciona para o dashboard
+    const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    if (verifySessionToken(token)) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
     return NextResponse.next();
   }
 
-  // TODO(etapa auth): validar cookie de sessão; se inválido:
-  // return NextResponse.redirect(new URL("/admin/login", request.url));
+  // Proteger todas as outras rotas /admin/*
+  if (pathname.startsWith("/admin")) {
+    const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    if (!verifySessionToken(token)) {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  // Webhook GSI (/api/gsi/*) fica FORA do matcher — precisa ser o mais rápido possível.
+  // O webhook GSI (/api/gsi/*) fica fora do matcher para máxima performance
   matcher: ["/admin/:path*"],
 };
