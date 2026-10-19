@@ -1,24 +1,34 @@
 import Link from "next/link";
-import { Trophy, Crosshair, Shield } from "lucide-react";
+import Image from "next/image";
+import { Trophy, Shield } from "lucide-react";
 
 export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-zinc-950 font-black shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-            <Crosshair className="h-5 w-5" />
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-amber-500/30 p-1 shadow-lg shadow-amber-500/10 group-hover:border-amber-400/60 group-hover:scale-105 transition-all">
+            <Image
+              src="/logo.svg"
+              alt="CS Valorosos Logo"
+              width={36}
+              height={36}
+              priority
+              className="h-full w-full object-contain"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-lg tracking-wider text-white">CSCAMP</span>
+              <span className="font-black text-lg tracking-wider text-white group-hover:text-amber-400 transition-colors">
+                CSCAMP
+              </span>
               <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/30">
                 CS2 LIVE
               </span>
             </div>
             <p className="text-[10px] font-mono text-zinc-500 tracking-wider uppercase hidden sm:block">
-              Game State Integration
+              Torneios & GSI Scoreboard
             </p>
           </div>
         </Link>

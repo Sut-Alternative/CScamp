@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   },
   description:
     "Acompanhe campeonatos de Counter-Strike 2 em rede local em tempo real: chaveamento, placar e estatísticas K/D/A e HS% ao vivo.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

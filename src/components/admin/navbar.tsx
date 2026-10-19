@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { logoutAction } from "@/app/admin/actions";
 import { Trophy, BookOpen, ExternalLink, LogOut } from "lucide-react";
 
@@ -8,13 +9,22 @@ export function AdminNavbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-zinc-950 font-black shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <Trophy className="h-5 w-5" />
+          <Link href="/admin" className="flex items-center gap-3 group">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-amber-500/30 p-1 shadow-lg shadow-amber-500/10 group-hover:border-amber-400/60 group-hover:scale-105 transition-all">
+              <Image
+                src="/logo.svg"
+                alt="CS Valorosos Logo"
+                width={36}
+                height={36}
+                priority
+                className="h-full w-full object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg tracking-wider text-white">CSCAMP</span>
+                <span className="font-extrabold text-lg tracking-wider text-white group-hover:text-amber-400 transition-colors">
+                  CSCAMP
+                </span>
                 <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/30">
                   HOST
                 </span>

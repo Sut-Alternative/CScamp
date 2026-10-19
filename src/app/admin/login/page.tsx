@@ -1,6 +1,6 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { LoginForm } from "@/components/admin/login-form";
-import { Crosshair } from "lucide-react";
 
 export const metadata = {
   title: "Login do Host",
@@ -23,8 +23,15 @@ export default function AdminLoginPage({
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-zinc-950 shadow-xl shadow-amber-500/20 mb-3">
-              <Crosshair className="h-7 w-7" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 border border-amber-500/30 p-2 shadow-xl shadow-amber-500/10 mb-3">
+              <Image
+                src="/logo.svg"
+                alt="CS Valorosos Logo"
+                width={56}
+                height={56}
+                priority
+                className="h-full w-full object-contain"
+              />
             </div>
             <span className="text-[11px] font-mono font-bold tracking-widest uppercase text-amber-400 mb-1">
               Counter-Strike 2 • Corujão
