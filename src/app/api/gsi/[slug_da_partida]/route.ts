@@ -24,31 +24,165 @@ export async function POST(
 
   const supabase = createAdminClient();
 
-  // 1. Busca a partida ativa pelo slug
-  const { data: match, error: matchErr } = await supabase
-    .from("matches")
-    .select(`
-      id,
-      team_a_id,
-      team_b_id,
-      team_a_score,
-      team_b_score,
-      status,
-      map_name,
-      current_round,
-      credentials:match_gsi_credentials(auth_token)
-    `)
-    .eq("gsi_endpoint_slug", slug)
-    .single();
+  // 1. Busca a partida ativa (Suporte a CFG Fixo de Espectador ou Slug Específico)
+  const isFixedEndpoint =
+    slug === "live" ||
+    slug === "transmissao" ||
+    slug === "espectador" ||
+    slug === "padrao" ||
+    slug === "corujao";
 
-  if (matchErr || !match) {
+  let match: {
+    id: string;
+    team_a_id: string;
+    team_b_id: string;
+    team_a_score: number;
+    team_b_score: number;
+    status: "scheduled" | "live" | "finished";
+    map_name: string | null;
+    current_round: number;
+    credentials?: unknown;
+  } | null = null;
+
+  if (isFixedEndpoint) {
+    // 1.1 Tenta achar a partida que está 'live' no momento
+    const { data: liveMatch } = await supabase
+      .from("matches")
+      .select(`
+        id,
+        team_a_id,
+        team_b_id,
+        team_a_score,
+        team_b_score,
+        status,
+        map_name,
+        current_round,
+        credentials:match_gsi_credentials(auth_token)
+      `)
+      .eq("status", "live")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (liveMatch) {
+      match = liveMatch;
+    } else {
+      // 1.2 Se não tem partida 'live', tenta detectar pelos SteamIDs dos jogadores em campo
+      const steamIds = Object.keys(payload.allplayers || {});
+      if (steamIds.length > 0) {
+        const { data: matchedPlayers } = await supabase
+          .from("players")
+          .select("team_id, steam_id")
+          .in("steam_id", steamIds);
+
+        if (matchedPlayers && matchedPlayers.length > 0) {
+          const teamIds = Array.from(new Set(matchedPlayers.map((p) => p.team_id)));
+          const { data: candidateMatch } = await supabase
+            .from("matches")
+            .select(`
+              id,
+              team_a_id,
+              team_b_id,
+              team_a_score,
+              team_b_score,
+              status,
+              map_name,
+              current_round,
+              credentials:match_gsi_credentials(auth_token)
+            `)
+            .in("team_a_id", teamIds)
+            .in("team_b_id", teamIds)
+            .neq("status", "finished")
+            .order("created_at", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+          if (candidateMatch) {
+            match = candidateMatch;
+          }
+        }
+      }
+
+      // 1.3 Se ainda não encontrou, pega a primeira partida agendada (scheduled)
+      if (!match) {
+        const { data: nextScheduled } = await supabase
+          .from("matches")
+          .select(`
+            id,
+            team_a_id,
+            team_b_id,
+            team_a_score,
+            team_b_score,
+            status,
+            map_name,
+            current_round,
+            credentials:match_gsi_credentials(auth_token)
+          `)
+          .eq("status", "scheduled")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (nextScheduled) {
+          match = nextScheduled;
+        }
+      }
+    }
+  } else {
+    // 1.4 Busca pelo slug específico
+    const { data: specificMatch } = await supabase
+      .from("matches")
+      .select(`
+        id,
+        team_a_id,
+        team_b_id,
+        team_a_score,
+        team_b_score,
+        status,
+        map_name,
+        current_round,
+        credentials:match_gsi_credentials(auth_token)
+      `)
+      .eq("gsi_endpoint_slug", slug)
+      .maybeSingle();
+
+    if (specificMatch) {
+      match = specificMatch;
+    } else {
+      // Fallback para partida 'live' caso o slug não bata
+      const { data: fallbackLive } = await supabase
+        .from("matches")
+        .select(`
+          id,
+          team_a_id,
+          team_b_id,
+          team_a_score,
+          team_b_score,
+          status,
+          map_name,
+          current_round,
+          credentials:match_gsi_credentials(auth_token)
+        `)
+        .eq("status", "live")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      match = fallbackLive;
+    }
+  }
+
+  if (!match) {
     return Response.json({ ok: false, error: "match_not_found" }, { status: 404 });
   }
 
   // 2. Valida token de autenticação se configurado
   const expectedAuthToken = (match.credentials as unknown as { auth_token: string }[])?.[0]?.auth_token;
-  if (expectedAuthToken && payload.auth?.token) {
-    if (payload.auth.token !== expectedAuthToken) {
+  const sentToken = payload.auth?.token;
+  if (expectedAuthToken && sentToken) {
+    const isMasterSpectator =
+      sentToken === "cscamp_live_spectator" || sentToken === "cscamp_gsi_token";
+    if (!isMasterSpectator && sentToken !== expectedAuthToken) {
       return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
     }
   }

@@ -127,21 +127,52 @@ export default function AdminManualPage() {
         </div>
 
         <div className="space-y-4 text-sm text-zinc-300">
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 space-y-1">
+            <span className="text-xs font-mono font-bold uppercase text-amber-300 tracking-wider">
+              ★ NOVIDADE: ARQUIVO 100% FIXO E IMUTÁVEL
+            </span>
+            <p className="text-xs text-amber-100/90 leading-relaxed">
+              Os 2 computadores de espectadores colocam este arquivo <strong>UMA ÚNICA VEZ</strong> antes de começar o campeonato. Você <strong>NÃO</strong> precisa fechar o CS2 nem trocar arquivos entre as partidas! O sistema direciona os dados automaticamente para a partida que estiver ao vivo.
+            </p>
+          </div>
+
           <div className="space-y-2">
             <p className="flex items-start gap-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-bold text-zinc-300">1</span>
-              <span>No notebook que ficará de espectador, crie um arquivo chamado <code className="text-amber-400 font-mono font-bold">gamestate_integration_mesa1.cfg</code> (o painel de cada partida já possui um botão que gera esse arquivo pronto para download).</span>
+              <span>No PC ou notebook que ficará de espectador, baixe ou crie o arquivo fixo oficial: <code className="text-amber-400 font-mono font-bold">gamestate_integration_cscamp.cfg</code> (disponível no botão <strong>&quot;CFG Fixo dos Espectadores&quot;</strong> no topo da página do campeonato).</span>
             </p>
           </div>
 
           <div className="space-y-2">
             <p className="flex items-start gap-2">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-bold text-zinc-300">2</span>
-              <span>Cole o seguinte código dentro dele (o sistema gera esse código dinamicamente para o Host copiar em cada partida criada):</span>
+              <span>Conteúdo oficial do arquivo fixo dos espectadores:</span>
             </p>
 
             <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs text-amber-200/90 overflow-x-auto select-all">
-              <pre>{sampleCfg}</pre>
+              <pre>{`"CS2_CSCAMP_GSI" {
+   "uri" "${publicEnv.siteUrl}/api/gsi/live"
+   "timeout" "5.0"
+   "buffer"  "0.1"
+   "throttle" "0.5"
+   "heartbeat" "30.0"
+   "auth" {
+      "token" "cscamp_live_spectator"
+   }
+   "data" {
+      "provider" "1"
+      "map" "1"
+      "round" "1"
+      "player_id" "1"
+      "player_match_stats" "1"
+      "player_state" "1"
+      "player_weapons" "1"
+      "allplayers_id" "1"
+      "allplayers_match_stats" "1"
+      "allplayers_state" "1"
+      "allplayers_weapons" "1"
+   }
+}`}</pre>
             </div>
           </div>
 

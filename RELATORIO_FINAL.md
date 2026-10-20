@@ -136,6 +136,18 @@ Uma rota pública dedicada e definitiva para eternizar cada campeonato após o s
 6. **Exportação Oficial em CSV:**
    - Download imediato da planilha com todas as métricas consolidadas dos atletas do campeonato.
 
+### 2.8. Configuração Fixa & Permanente para Espectadores (`gamestate_integration_cscamp.cfg`)
+Solução definitiva para os computadores de transmissão e espectadores durante o campeonato:
+
+1. **Arquivo Único e Imutável:**
+   - Os 2 computadores de espectadores colocam o arquivo `gamestate_integration_cscamp.cfg` **uma única vez** antes do campeonato começar.
+2. **Zero Reinícios do CS2:**
+   - O CS2 é aberto uma única vez e permanece aberto a noite toda. Não é necessário sair do jogo, renomear arquivos ou reiniciar o CS2 entre as partidas de Quartas, Semifinais ou Final.
+3. **Roteamento Dinâmico Inteligente:**
+   - O webhook `/api/gsi/live` detecta automaticamente a partida marcada como `live` no painel do host, ou auto-identifica as equipes em campo lendo os `SteamID64` dos atletas que entraram no servidor.
+4. **Botão de Acesso Rápido no Painel:**
+   - Botão **"CFG Fixo dos Espectadores"** no topo da página do campeonato com cópia e download prontos em 1 clique.
+
 ---
 
 ## 3. Guia de Deploy na Vercel (Passo a Passo)

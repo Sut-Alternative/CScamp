@@ -12,6 +12,7 @@ import {
   deleteMatchAction,
 } from "@/app/admin/actions";
 import { GsiModal } from "@/components/admin/gsi-modal";
+import { FixedGsiModal } from "@/components/admin/fixed-gsi-modal";
 import { MatchControlModal } from "@/components/admin/match-control-modal";
 import { AdminNavbar } from "@/components/admin/navbar";
 import { ChampionshipStatusSelect } from "@/components/admin/championship-status-select";
@@ -137,6 +138,9 @@ export default async function AdminChampionshipPage({
               currentStatus={championship.status}
             />
           </div>
+
+          {/* CFG Fixo dos Espectadores */}
+          <FixedGsiModal siteUrl={publicEnv.siteUrl} />
 
           {/* Link para o museu */}
           <Link
